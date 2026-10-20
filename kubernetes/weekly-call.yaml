@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weekly-call
+  namespace: techpathway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: weekly-call
+  template:
+    metadata:
+      labels:
+        app: weekly-call
+    spec:
+      containers:
+        - name: weekly-call
+          image: 898220629935.dkr.ecr.us-east-1.amazonaws.com/weekly-call:latest
+          ports:
+            - containerPort: 5111
+
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: techpathway-secrets
+                  key: SECRET_KEY
+
+            - name: NOTIFICATION_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: techpathway-config
+                  key: NOTIFICATION_SERVICE_URL
+
+            - name: WAREHOUSE_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: techpathway-config
+                  key: WAREHOUSE_SERVICE_URL
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5111
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5111
+            initialDelaySeconds: 20
+            periodSeconds: 20
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: weekly-call
+  namespace: techpathway
+spec:
+  selector:
+    app: weekly-call
+  ports:
+    - port: 5111
+      targetPort: 5111
+  type: ClusterIP

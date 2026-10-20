@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: techpathway-config
+  namespace: techpathway
+data:
+  NOTIFICATION_SERVICE_URL: "http://action-messages:5001"
+  WAREHOUSE_SERVICE_URL: "http://techpathway-warehouse:5002"
+  NOTIFICATION_PUBLIC_URL: ""
+  WAREHOUSE_PUBLIC_URL: ""
